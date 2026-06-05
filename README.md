@@ -315,5 +315,5 @@ files (assets, demos, docs, tests, CI config) were removed to reduce size — se
 
 ## License
 
-Copyright 2026 HackCaesar. Licensed under the **Apache License 2.0** — see
+Copyright 2026 Mikhail Sankov. Licensed under the **Apache License 2.0** — see
 [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
