@@ -35,12 +35,10 @@ terminal dashboard. No Airflow, no web UI.
 
 ## Preview
 
-<img width="1280" height="720" alt="frame_20260603_231313_0001" src="https://github.com/user-attachments/assets/1dd95a22-029d-4f0f-9123-d3bd16188e8b" />
-<img width="1280" height="720" alt="frame_20260603_231313_0001_overlay" src="https://github.com/user-attachments/assets/dcda6fa4-2bc0-43c2-9fa3-8e9b5dd8096c" />
-
-
-<img width="1280" height="720" alt="frame_20260603_233101_0004" src="https://github.com/user-attachments/assets/fc50f272-0922-43b0-bd01-463e6c171ba4" />
-<img width="1280" height="720" alt="frame_20260603_233101_0004_overlay" src="https://github.com/user-attachments/assets/0c64b5d5-c477-468e-bdbf-45deb94d669e" />
+<img width="640" height="360" alt="frame_20260603_233101_0004_overlay" src="https://github.com/user-attachments/assets/b5b05eec-cd73-42b2-ae85-254c71cd5356" />
+<img width="640" height="360" alt="frame_20260603_233101_0004" src="https://github.com/user-attachments/assets/306f4fdd-9703-4a8f-89aa-a1eabdc41e93" />
+<img width="640" height="360" alt="frame_20260603_231313_0001_overlay" src="https://github.com/user-attachments/assets/747da959-b684-4e5b-b08b-b3d6a4b33de2" />
+<img width="640" height="360" alt="frame_20260603_231313_0001" src="https://github.com/user-attachments/assets/c8350719-7826-4f71-9a5e-ec7fe92bd91a" />
 
 
 
