@@ -237,10 +237,10 @@ including the scenario builder and projection model, are in
 
 
 (.dcs_venv) PS D:\MLOps_pipeline> D:\yolo\.dcs_venv\Scripts\python.exe orchestrator\main.py `
->>       --config configs\config.yaml `
->>       --mission D:\yolo\DCS_AutoDataset\missions\mvp_sea_scene.miz `
->>       --frames 50 `
->>       --frame-id real_run_001
+       --config configs\config.yaml `
+       --mission D:\yolo\DCS_AutoDataset\missions\mvp_sea_scene.miz `
+       --frames 50 `
+       --frame-id real_run_001
 
 ---
 
