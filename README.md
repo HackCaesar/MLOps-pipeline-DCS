@@ -33,6 +33,15 @@ terminal dashboard. No Airflow, no web UI.
 
 ---
 
+## Preview
+
+![Uploading frame_20260603_231313_0001.png…]()
+
+
+
+
+---
+
 ## Contents
 
 - [How it works](#how-it-works)
