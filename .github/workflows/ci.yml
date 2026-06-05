@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install (CPU-only deps; torch/yolox/tensorrt/mlflow are NOT installed here)
+        run: |
+          python -m pip install --upgrade pip
+          # dataset = numpy/opencv/pycocotools/pillow; agent = fastapi/uvicorn/requests;
+          # dev = pytest/ruff; tui = rich. sqlite3 ships with CPython on ubuntu.
+          pip install -e ".[dataset,agent,dev,tui]"
+
+      - name: Lint (ruff — F: pyflakes, I: import sort)
+        run: ruff check .
+
+      - name: Tests
+        # Heavy/GPU tests (torch, yolox, onnxruntime, tensorrt, pycuda, mlflow) self-skip
+        # when their optional deps are absent — see each test's importorskip / skipif.
+        # Full GPU + training + ONNX/TRT runs happen in the Docker images, not in CI.
+        run: pytest -q

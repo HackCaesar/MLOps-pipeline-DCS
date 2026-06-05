@@ -1,0 +1,25 @@
+# Windows DCS Runner Agent config (runs on Windows host, NOT in Docker).
+# See docs/dcs_capture.md for the deployment workflow.
+
+agent:
+  http:
+    host: 0.0.0.0          # bind on all interfaces so containers can reach via host.docker.internal
+    port: 8765
+  shared_folder:
+    commands_dir: D:/MLOps_storage/shared/commands
+    status_dir:   D:/MLOps_storage/shared/status
+    poll_interval_sec: 2.0
+  subprocess:
+    # The agent invokes these as `python -m <module>` from these working dirs.
+    # NOTE: orchestrator_cwd points at apps/dcs_capture_host so the host-side
+    # capture code keeps its cwd-based top-level imports (orchestrator.*,
+    # projection.*, exporters.*, ...). See docs/dcs_capture.md.
+    python_executable:   D:/MLOps_pipeline/.dcs_venv/Scripts/python.exe
+    orchestrator_module: orchestrator.main
+    orchestrator_cwd:    D:/MLOps_pipeline/apps/dcs_capture_host
+    adapter_module:      apps.dcs_capture.cli
+    adapter_cwd:         D:/MLOps_pipeline
+    pipeline_config_path: D:/MLOps_pipeline/configs/pipeline_host.yaml   # host paths -> adapter writes raw to D:/MLOps_storage
+  paths:
+    raw_target_root: D:/MLOps_storage/datasets/raw
+    log_dir:         D:/MLOps_storage/logs/agent

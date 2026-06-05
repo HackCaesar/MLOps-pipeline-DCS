@@ -1,0 +1,160 @@
+# HOST-side pipeline config (runs ON the Windows machine, NOT in a container).
+#
+# Use this for the DCS capture stage (Path B): the orchestrator runs the sim and
+# the apps.dcs_capture adapter normalises _staging/dcs -> datasets/raw on the host.
+# The KEY difference vs configs/pipeline.yaml is storage.root_dir: here it is the
+# real host volume D:/MLOps_storage, so the adapter writes the raw dataset to
+# D:\MLOps_storage\datasets\raw\<id> (inside containers that same volume is
+# bind-mounted at /workspace/storage — see docker-compose.yml).
+#
+#   python -m apps.dcs_capture_host.orchestrator --config configs/smoke_dataset_capture.yaml
+#   python -m apps.dcs_capture --pipeline-config configs/pipeline_host.yaml
+#
+# Training / evaluation / export still run in Docker (GPU) against the same
+# volume; those sections are kept here only so the file is a complete, valid config.
+
+pipeline:
+  run_id: null
+  seed: 42
+  cleanup_tmp_after_run: true
+  log_level: INFO
+
+storage:
+  backend: local
+  root_dir: D:/MLOps_storage                          # <-- real host volume (the whole point of this file)
+  host_root: D:/MLOps_storage
+  datasets_dir:         ${storage.root_dir}/datasets
+  runs_dir:             ${storage.root_dir}/runs
+  artifacts_dir:        ${storage.root_dir}/artifacts
+  tmp_dir:              ${storage.root_dir}/tmp
+  cache_dir:            ${storage.root_dir}/cache
+  logs_dir:             ${storage.root_dir}/logs
+  shared_dir:           ${storage.root_dir}/shared
+  metadata_dir:         ${storage.root_dir}/metadata
+  mlflow_artifacts_dir: ${storage.root_dir}/mlflow_artifacts
+  staging:
+    enabled: false
+    cache_dir: D:/MLOps_storage/tmp/pipeline_staging
+
+metadata_store:
+  backend: sqlite
+  sqlite_path: ${storage.metadata_dir}/pipeline.db
+
+dcs_capture:
+  enabled: true
+  mode: disabled                                      # host runs the orchestrator directly; no agent self-request
+  source_output_dir: ${storage.datasets_dir}/_staging/dcs   # = D:/MLOps_storage/datasets/_staging/dcs
+  image_placement:   copy                              # _staging and raw share one volume, but copy stays robust on drvfs
+  raw_target_dir:    ${storage.datasets_dir}/raw       # = D:/MLOps_storage/datasets/raw
+  mission_path:      D:/MLOps_pipeline/apps/dcs_capture_host/missions/mvp_ship_only.miz
+  dcs_config_path:   D:/MLOps_pipeline/apps/dcs_capture_host/configs/config.yaml
+  num_frames:        50
+
+data:
+  dataset_id: null
+  raw_dataset_dir: null
+  annotation_format: coco
+  class_names_path: configs/classes.yaml
+  split_strategy: by_source_frame_hash
+  split_ratios: {train: 0.70, val: 0.15, test: 0.15}
+
+enrichment:
+  enabled: true
+  mode: temporary_materialization
+  crop_size: 640
+  stride: 320
+  visible_area_threshold: 0.80
+  include_edge_tiles: true
+  keep_background_images: true
+  background_policy:
+    resize_to: [640, 640]
+    method: letterbox
+    pad_value: 114
+  scales:
+    - {name: original,     mode: keep_original, crop: true}
+    - {name: full_hd,      size: [1920, 1080],  crop: true}
+    - {name: intermediate, size: [1536,  864],  crop: true}
+    - {name: final_640,    size: [ 640,  640],  crop: false}
+
+training:
+  framework: yolox
+  exp_module: experiments.yolox.class_obj_at_sea
+  pretrained_weights: ${storage.root_dir}/pretrained/yolox_s.pth   # = D:\MLOps_storage\pretrained\yolox_s.pth
+  max_epoch: 100
+  batch_size: 8
+  input_size: [640, 640]
+  test_size:  [640, 640]
+  multiscale_range: 0
+  no_aug_epochs:  15
+  eval_interval: 10
+  num_workers: 4
+  fp16: true
+  allow_cpu_fallback: false
+  dry_run: false
+  checkpoint_policy:
+    save_best: true
+    save_latest: true
+    save_every_n_epochs: 20
+    save_history_ckpt: false
+  ckpt_dir: ${storage.artifacts_dir}/checkpoints/${pipeline.run_id}
+
+evaluation:
+  enabled: true
+  full_image_first: true
+  crop_inference: true
+  crop_size: 640
+  stride: 320
+  scales:
+    - {name: full_source,        mode: source_full_image}
+    - {name: original_crops,     mode: keep_original, crop: true}
+    - {name: full_hd_crops,      size: [1920, 1080],  crop: true}
+    - {name: intermediate_crops, size: [1536,  864],  crop: true}
+    - {name: final_640,          size: [ 640,  640],  crop: false}
+  merge:
+    method: class_aware_nms
+    iou_threshold: 0.50
+    confidence_threshold: 0.25
+    max_detections_per_image: 300
+    fragment_fusion:
+      enabled: true
+      max_distance_px: 50
+      min_iou: 0.05
+      min_ios: 0.3
+      strategy: union
+      max_aspect_ratio: 30
+      max_area_ratio: 50
+      disabled_classes: []
+  metrics:
+    iou_thresholds: [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+    save_confusion_matrix: true
+    save_fp_fn_examples: true
+    save_visualizations: true
+    max_visualizations: 50
+  reports_dir:         ${storage.artifacts_dir}/reports/${pipeline.run_id}
+  visualizations_dir:  ${storage.artifacts_dir}/visualizations/${pipeline.run_id}
+
+export:
+  enabled: false
+  formats: [onnx, tensorrt_fp16, tensorrt_int8]
+  exports_dir: ${storage.artifacts_dir}/exports/${pipeline.run_id}
+  onnx:
+    opset: 11
+    dynamic_axes: false
+  tensorrt:
+    workspace_mb: 4096
+    int8_calib_images_dir: null
+
+mlflow:
+  enabled: true
+  tracking_uri: http://localhost:5000                 # host reaches the published mlflow port (vs http://mlflow:5000 in-container)
+  experiment_name: dcs_yolox_pipeline
+  log_artifacts: true
+  artifact_root: ${storage.mlflow_artifacts_dir}
+
+tracking:
+  strict: true
+  train_log_interval_iters: 10
+  train_log_interval_seconds: 5
+
+docker:
+  use_gpu: true

@@ -1,0 +1,129 @@
+# Top-level compose for the DCS → YOLOX MLOps pipeline.
+#
+# Storage lives OUTSIDE this repo (D:\MLOps_storage). The host path is taken
+# from ${STORAGE_ROOT} (see .env / .env.example); inside every container it is
+# always mounted at /workspace/storage.
+#
+# Bind mounts (host → container):
+#   ${STORAGE_ROOT}  → /workspace/storage   (datasets, cache, runs, artifacts, mlflow, sqlite)
+#   ./               → /workspace/pipeline  (the code itself)
+#
+# YOLOX is vendored at vendor/YOLOX and baked into the GPU images at build time
+# (no bind mount). DCS World runs on the Windows host, NOT in compose — the
+# agent listens on host.docker.internal:8765 (see configs/dcs_agent.yaml and
+# docs/dcs_capture.md). There is NO Airflow in this stack.
+#
+# Usage examples:
+#   docker compose build                              # build all images
+#   docker compose up -d mlflow                       # MLflow UI on http://localhost:5000
+#   docker compose run --rm pipeline-controller python -m scripts.init_metadata_db --config configs/pipeline.yaml
+#   docker compose run --rm dataset-processor python -m apps.dataset_enrichment.cli build --config configs/pipeline.yaml
+#   docker compose run --rm yolox-trainer python -m apps.yolox_training.cli train --config configs/pipeline.yaml --run-id 2026_05_25_001
+#   docker compose run --rm evaluator-exporter python -m apps.evaluation_export.cli evaluate --backend pytorch ...
+
+services:
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/mlflow.Dockerfile
+    image: dcs-yolox/mlflow:latest
+    container_name: dcs-mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${STORAGE_ROOT:-/mnt/d/MLOps_storage}:/workspace/storage
+    restart: unless-stopped
+
+  pipeline-controller:
+    build:
+      context: .
+      dockerfile: docker/pipeline_controller.Dockerfile
+    image: dcs-yolox/pipeline-controller:latest
+    container_name: dcs-pipeline-controller
+    depends_on:
+      - mlflow
+    environment:
+      STORAGE_ROOT:          /workspace/storage
+      DCS_AGENT_URL:         http://host.docker.internal:8765
+      MLFLOW_TRACKING_URI:   http://mlflow:5000
+    extra_hosts:
+      # Linux Docker daemon doesn't add host.docker.internal automatically.
+      # Docker Desktop on Windows/macOS adds it itself but extra_hosts is a no-op there.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${STORAGE_ROOT:-/mnt/d/MLOps_storage}:/workspace/storage
+      - ./:/workspace/pipeline
+    working_dir: /workspace/pipeline
+
+  dataset-processor:
+    build:
+      context: .
+      dockerfile: docker/dataset_processor.Dockerfile
+    image: dcs-yolox/dataset-processor:latest
+    container_name: dcs-dataset-processor
+    depends_on:
+      - mlflow
+    environment:
+      STORAGE_ROOT:        /workspace/storage
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ${STORAGE_ROOT:-/mnt/d/MLOps_storage}:/workspace/storage
+      - ./:/workspace/pipeline
+    working_dir: /workspace/pipeline
+
+  yolox-trainer:
+    build:
+      context: .
+      dockerfile: docker/yolox_trainer.Dockerfile
+    image: dcs-yolox/yolox-trainer:latest
+    container_name: dcs-yolox-trainer
+    depends_on:
+      - mlflow
+    environment:
+      STORAGE_ROOT:        /workspace/storage
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    runtime: nvidia
+    volumes:
+      - ${STORAGE_ROOT:-/mnt/d/MLOps_storage}:/workspace/storage
+      - ./:/workspace/pipeline
+    working_dir: /workspace/pipeline
+    shm_size: "8gb"
+
+  evaluator-exporter:
+    build:
+      context: .
+      dockerfile: docker/evaluator_exporter.Dockerfile
+    image: dcs-yolox/evaluator-exporter:latest
+    container_name: dcs-evaluator-exporter
+    depends_on:
+      - mlflow
+    environment:
+      STORAGE_ROOT:        /workspace/storage
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    runtime: nvidia
+    volumes:
+      - ${STORAGE_ROOT:-/mnt/d/MLOps_storage}:/workspace/storage
+      - ./:/workspace/pipeline
+    working_dir: /workspace/pipeline
+    # Training/eval DataLoader workers need a real /dev/shm; the 64 MB default
+    # makes PyTorch workers die with a bus error at "init prefetcher".
+    shm_size: "8gb"

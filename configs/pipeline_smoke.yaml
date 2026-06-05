@@ -1,0 +1,75 @@
+# Smoke config — tiny, CPU-only, self-contained. For local/CI sanity of the
+# data-flow stages (register → build-cache) WITHOUT a GPU or DCS.
+#
+# It does NOT capture from DCS: point data.raw_dataset_dir at a small raw dataset
+# you already have, or generate one from the test fixtures:
+#
+#   python -c "from tests.fixtures.mini_raw_dataset import write_mini_raw_dataset; \
+#              write_mini_raw_dataset('.smoke_storage/datasets/raw', dataset_id='fixture_5frames', \
+#              images_per_split={'train':3,'val':1,'test':1})"
+#
+#   python -m apps.dataset_enrichment.cli build-cache --config configs/pipeline_smoke.yaml --run-id smoke_001
+
+pipeline:
+  run_id: smoke_001
+  seed: 42
+  log_level: INFO
+
+storage:
+  backend: local
+  root_dir:             ./.smoke_storage          # self-contained, gitignored
+  datasets_dir:         ${storage.root_dir}/datasets
+  runs_dir:             ${storage.root_dir}/runs
+  artifacts_dir:        ${storage.root_dir}/artifacts
+  cache_dir:            ${storage.root_dir}/cache
+  metadata_dir:         ${storage.root_dir}/metadata
+  mlflow_artifacts_dir: ${storage.root_dir}/mlflow_artifacts
+
+metadata_store:
+  backend: sqlite
+  sqlite_path: ${storage.metadata_dir}/pipeline.db
+
+dcs_capture:
+  enabled: false
+  mode: disabled
+
+data:
+  dataset_id: fixture_5frames
+  raw_dataset_dir: ${storage.datasets_dir}/raw/fixture_5frames
+  class_names_path: configs/classes.yaml
+  split_ratios: {train: 0.70, val: 0.15, test: 0.15}
+
+enrichment:
+  enabled: true
+  crop_size: 640
+  stride: 320
+  visible_area_threshold: 0.80
+  include_edge_tiles: true
+  keep_background_images: true
+  background_policy: {resize_to: [640, 640], method: letterbox, pad_value: 114}
+  scales:
+    - {name: original,  mode: keep_original, crop: true}
+    - {name: final_640, size: [640, 640],   crop: false}
+
+training:
+  framework: yolox
+  exp_module: experiments.yolox.class_obj_at_sea
+  max_epoch: 1
+  batch_size: 2
+  input_size: [640, 640]
+  test_size:  [640, 640]
+  multiscale_range: 0
+  no_aug_epochs: 0
+  eval_interval: 1
+  num_workers: 0
+  fp16: false
+  allow_cpu_fallback: true        # smoke only — real training needs a GPU
+  dry_run: true
+
+mlflow:
+  enabled: false
+
+tracking:
+  strict: false                   # smoke: don't fail on tracking hiccups
+  train_log_interval_iters: 5
+  train_log_interval_seconds: 2

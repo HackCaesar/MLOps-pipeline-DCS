@@ -1,0 +1,113 @@
+# Production pipeline config — paths reference /workspace/* bind-mounts.
+pipeline:
+  run_id: prod_2026_05_29_001
+  seed: 42
+  cleanup_tmp_after_run: false
+  log_level: INFO
+
+storage:
+  backend: local
+  root_dir: /workspace/storage
+  datasets_dir: /workspace/storage/datasets
+  runs_dir: /workspace/storage/runs
+  artifacts_dir: /workspace/storage/artifacts
+  tmp_dir: /workspace/storage/tmp          # legacy: unused by enrichment/training
+  cache_dir: /workspace/storage/cache
+  metadata_dir: /workspace/storage/metadata
+  mlflow_artifacts_dir: /workspace/storage/mlflow_artifacts
+
+metadata_store:
+  backend: sqlite
+  sqlite_path: /workspace/storage/metadata/pipeline.db
+
+dcs_capture:
+  enabled: true
+  mode: disabled
+  source_output_dir: /workspace/storage/datasets/_staging/dcs_caucasus
+  image_placement: copy        # robust default; the storage bind-mount (drvfs) may not support hardlinks
+  raw_target_dir: /workspace/storage/datasets/raw
+  dcs_config_path: /workspace/pipeline/configs/caucasus_static_neutral_capture.yaml
+
+data:
+  dataset_id: dcs_caucasus_100
+  raw_dataset_dir: /workspace/storage/datasets/raw/dcs_caucasus_100
+  class_names_path: /workspace/pipeline/configs/classes.yaml
+  split_ratios: {train: 0.70, val: 0.15, test: 0.15}
+
+enrichment:
+  enabled: true
+  mode: temporary_materialization
+  crop_size: 640
+  stride: 320
+  visible_area_threshold: 0.80
+  include_edge_tiles: true
+  keep_background_images: true
+  background_policy: {resize_to: [640, 640], method: letterbox, pad_value: 114}
+  scales:
+    - {name: original, mode: keep_original, crop: true}
+    - {name: full_hd, size: [1920, 1080], crop: true}
+    - {name: final_640, size: [640, 640], crop: false}
+
+training:
+  framework: yolox
+  exp_module: experiments.yolox.class_obj_at_sea
+  pretrained_weights: /workspace/storage/pretrained/yolox_s.pth   # = D:\MLOps_storage\pretrained\yolox_s.pth
+  max_epoch: 30
+  batch_size: 8
+  input_size: [640, 640]
+  test_size:  [640, 640]
+  multiscale_range: 0
+  no_aug_epochs: 5
+  eval_interval: 5
+  num_workers: 2
+  fp16: true
+  allow_cpu_fallback: false
+  dry_run: false
+  checkpoint_policy:
+    save_best: true
+    save_latest: true
+    save_every_n_epochs: 5
+    save_history_ckpt: false
+  ckpt_dir: /workspace/storage/artifacts/checkpoints/prod_2026_05_29_001
+
+evaluation:
+  enabled: true
+  full_image_first: true
+  crop_size: 640
+  stride: 320
+  include_edge_tiles: true
+  scales:
+    - {name: full_source, mode: source_full_image}
+  merge:
+    method: class_aware_nms
+    iou_threshold: 0.5
+    confidence_threshold: 0.25
+    max_detections_per_image: 300
+    fragment_fusion: {enabled: true, max_distance_px: 50, min_iou: 0.05, min_ios: 0.3,
+                      strategy: union, max_aspect_ratio: 30, max_area_ratio: 50, disabled_classes: []}
+  metrics:
+    iou_thresholds: [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+    save_confusion_matrix: true
+    save_fp_fn_examples: true
+    save_visualizations: false
+  reports_dir: /workspace/storage/artifacts/reports/prod_2026_05_29_001
+
+export:
+  enabled: true
+  onnx:
+    opset: 13
+    output_path: /workspace/storage/artifacts/exports/prod_2026_05_29_001/model.onnx
+  trt_fp16:
+    enabled: false
+  trt_int8:
+    enabled: false
+
+mlflow:
+  enabled: true
+  tracking_uri: http://mlflow:5000
+  experiment_name: dcs_yolox_production
+
+tracking:
+  strict: true
+  train_log_interval_iters: 10
+  train_log_interval_seconds: 5

@@ -1,0 +1,17 @@
+# Retention / GC policy for MLOps_storage.
+#   python -m apps.pipeline.cli gc --config configs/pipeline_production.yaml            # dry-run (default)
+#   python -m apps.pipeline.cli gc --config configs/pipeline_production.yaml --apply    # actually delete
+#
+# datasets/raw is NEVER pruned (immutable, valuable). Only runs/, cache/tiles/ and
+# datasets/_staging/ are considered.
+
+runs:
+  keep_last: 20          # always keep the N most recent runs
+  keep_best: 5           # always keep top-K runs by primary eval metric (mAP)
+  max_age_days: 90       # also keep anything newer than this; null = age is not a keep reason
+
+tile_caches:
+  keep_last_per_dataset: 3   # for caches NOT referenced by a kept run, keep this many newest per dataset
+
+staging:
+  max_age_hours: 24      # datasets/_staging/* older than this is removed

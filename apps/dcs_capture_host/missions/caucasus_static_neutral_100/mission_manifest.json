@@ -1,0 +1,225 @@
+{
+  "map": "Caucasus",
+  "coalition": "neutral / United Nations Peacekeepers",
+  "static_policy": "ships: one zero-speed waypoint; helicopters: in-air hover (speed=0) at 60-120 m AGL, uncontrolled; planes: in-air level cruise 80-110 m/s at 200-300 m AGL, uncontrolled",
+  "camera_policy": "15 m ASL, pitch 0, orbit 320-580 m around primary target only",
+  "sea_base_xy": [
+    -150000.0,
+    -300000.0
+  ],
+  "missions": [
+    {
+      "file": "caucasus_static_neutral_01_winter_morning_clear_ships.miz",
+      "season": "winter",
+      "time": "10:00",
+      "weather": "clear",
+      "visibility": "good",
+      "classes": [
+        "ship"
+      ],
+      "ships": [
+        "Dry-cargo ship-1",
+        "KILO"
+      ],
+      "helicopters": [],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_02_winter_day_cloudy_ships.miz",
+      "season": "winter",
+      "time": "12:00",
+      "weather": "cloudy cold light",
+      "visibility": "good",
+      "classes": [
+        "ship"
+      ],
+      "ships": [
+        "Dry-cargo ship-2",
+        "Dry-cargo ship-1",
+        "Ship_Tilde_Supply"
+      ],
+      "helicopters": [],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_03_spring_morning_haze_helos.miz",
+      "season": "spring",
+      "time": "09:00",
+      "weather": "light haze",
+      "visibility": "medium",
+      "classes": [
+        "ship",
+        "helicopter"
+      ],
+      "ships": [
+        "Dry-cargo ship-1"
+      ],
+      "helicopters": [
+        "UH-1H",
+        "Mi-24P"
+      ],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_04_spring_evening_broken_planes.miz",
+      "season": "spring",
+      "time": "17:30",
+      "weather": "broken clouds",
+      "visibility": "good",
+      "classes": [
+        "ship",
+        "airplane"
+      ],
+      "ships": [
+        "Dry-cargo ship-2"
+      ],
+      "helicopters": [],
+      "planes": [
+        "A-10C",
+        "Su-25T"
+      ],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_05_summer_day_clear_ships.miz",
+      "season": "summer",
+      "time": "12:00",
+      "weather": "clear",
+      "visibility": "excellent",
+      "classes": [
+        "ship"
+      ],
+      "ships": [
+        "KILO",
+        "Dry-cargo ship-1",
+        "Ship_Tilde_Supply"
+      ],
+      "helicopters": [],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_06_summer_evening_warm_helos.miz",
+      "season": "summer",
+      "time": "18:00",
+      "weather": "warm low sun",
+      "visibility": "good",
+      "classes": [
+        "ship",
+        "helicopter"
+      ],
+      "ships": [
+        "Ship_Tilde_Supply"
+      ],
+      "helicopters": [
+        "Mi-8MT",
+        "Ka-50",
+        "UH-1H"
+      ],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_07_autumn_morning_overcast_planes.miz",
+      "season": "autumn",
+      "time": "09:00",
+      "weather": "overcast",
+      "visibility": "medium",
+      "classes": [
+        "ship",
+        "airplane"
+      ],
+      "ships": [
+        "Ship_Tilde_Supply"
+      ],
+      "helicopters": [],
+      "planes": [
+        "MiG-29A",
+        "A-10C",
+        "Su-25T"
+      ],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_08_autumn_day_cloudy_ships.miz",
+      "season": "autumn",
+      "time": "12:00",
+      "weather": "cloudy",
+      "visibility": "medium",
+      "classes": [
+        "ship"
+      ],
+      "ships": [
+        "Dry-cargo ship-2",
+        "Dry-cargo ship-1",
+        "KILO"
+      ],
+      "helicopters": [],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_09_spring_day_mist_helos.miz",
+      "season": "spring",
+      "time": "13:00",
+      "weather": "light mist",
+      "visibility": "reduced but clear targets",
+      "classes": [
+        "ship",
+        "helicopter"
+      ],
+      "ships": [
+        "KILO"
+      ],
+      "helicopters": [
+        "AH-64D",
+        "Ka-50"
+      ],
+      "planes": [],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    },
+    {
+      "file": "caucasus_static_neutral_10_autumn_evening_complex_planes.miz",
+      "season": "autumn",
+      "time": "16:30",
+      "weather": "evening broken haze",
+      "visibility": "medium",
+      "classes": [
+        "ship",
+        "airplane"
+      ],
+      "ships": [
+        "Dry-cargo ship-1"
+      ],
+      "helicopters": [],
+      "planes": [
+        "A-10C",
+        "MiG-29A"
+      ],
+      "neutral": true,
+      "static": true,
+      "frames_requested": 10
+    }
+  ]
+}

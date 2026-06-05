@@ -1,0 +1,8 @@
+# Class names for YOLOX detection — canonical 3-class contract.
+# Single source of truth in code: packages/common/classes.py
+# (kept in sync by tests/unit/test_classes_contract.py).
+# 'buoys' was dropped (0 annotations); helicopters/airplanes renumbered 2,3 -> 1,2.
+categories:
+  - {id: 0, name: ships}
+  - {id: 1, name: helicopters}
+  - {id: 2, name: airplanes}

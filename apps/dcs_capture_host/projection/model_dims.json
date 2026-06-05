@@ -1,0 +1,18 @@
+{
+  "ships": {"length": 155.0, "width": 20.0, "height": 45.0},
+  "helicopters": {"length": 15.0, "width": 4.0, "height": 5.0},
+  "airplanes": {"length": 18.0, "width": 13.0, "height": 4.5},
+  "arleigh burke": {"length": 155.3, "width": 20.0, "height": 46.0},
+  "cg-47": {"length": 173.0, "width": 16.8, "height": 40.0},
+  "kilo": {"length": 72.6, "width": 9.9, "height": 12.0},
+  "uh-1h": {"length": 17.4, "width": 2.6, "height": 4.4},
+  "mi-8mt": {"length": 18.4, "width": 2.5, "height": 5.6},
+  "ka-50": {"length": 16.0, "width": 3.4, "height": 4.9},
+  "mi-24": {"length": 17.5, "width": 3.2, "height": 5.0},
+  "ah-64": {"length": 17.8, "width": 3.2, "height": 4.8},
+  "a-10c": {"length": 16.26, "width": 17.53, "height": 4.42},
+  "f-16c_50": {"length": 15.06, "width": 9.96, "height": 4.88},
+  "f-16": {"length": 15.06, "width": 9.96, "height": 4.88},
+  "su-25t": {"length": 15.33, "width": 14.36, "height": 4.8},
+  "f/a-18c": {"length": 17.1, "width": 12.3, "height": 4.7}
+}

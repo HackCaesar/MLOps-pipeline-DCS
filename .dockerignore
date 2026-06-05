@@ -1,0 +1,36 @@
+# Build context trimming. Code is bind-mounted at runtime (./ -> /workspace/pipeline);
+# only vendor/YOLOX and docker/ are COPY'd into images at build time.
+
+.git/
+.gitignore
+.env
+
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+.dcs_venv/
+.train_venv/
+
+# Not needed inside images
+tests/
+docs/
+*.md
+!docker/README.md
+
+# Never ship a nested git repo for the vendored library
+vendor/YOLOX/.git/
+
+# Artifacts
+*.pth
+*.pt
+*.onnx
+*.engine
+*.cache
+*.log

@@ -1,0 +1,126 @@
+schema_version: 1
+
+paths:
+  steam_exe: "D:/Steam/steam.exe"
+  dcs_exe: "D:/Steam/steamapps/common/DCSWorld/bin/DCS.exe"
+  saved_games_dir: "C:/Users/maest/Saved Games/DCS"
+  scripts_dir: "C:/Users/maest/Saved Games/DCS/Scripts"
+  screenshots_dir: "C:/Users/maest/Saved Games/DCS/ScreenShots"
+  default_mission_path: "D:/MLOps_pipeline/apps/dcs_capture_host/missions/caucasus_static_neutral_100/caucasus_static_neutral_01_winter_morning_clear_ships.miz"
+  logs_dir: "./logs"
+  output_root: "D:/MLOps_storage/datasets/_staging/dcs"
+
+pipeline:
+  seed: 123456
+  max_scenes: 10
+  frames_per_scene: 10
+  retries_per_stage: 2
+  strict_sync: true
+  save_debug_overlays: true
+  keep_invalid_samples: true
+  allowed_quality_tiers_for_training: ["exact_visible", "exact", "strong", "approximate"]
+
+generation:
+  map_id: "Caucasus"
+  sea_only: true
+  allowed_classes: ["ships", "helicopters", "airplanes"]
+  class_balance:
+    ships: 0.40
+    helicopters: 0.30
+    airplanes: 0.30
+  objects_per_scene:
+    min: 1
+    max: 7
+  airborne_altitudes_asl_m:
+    base_min: 0.0
+    base_max: 0.0
+    extended_min: 0.0
+    extended_max: 0.0
+  camera_to_target_range_m:
+    min: 300.0
+    max: 600.0
+  min_inter_object_distance_m: 30.0
+  max_overlap_mode_fraction: 0.15
+  scene_modes: ["static_neutral_mixed"]
+  weather_presets: ["clear", "cloudy", "haze", "overcast", "low_sun"]
+
+camera:
+  height_reference: "asl"
+  fixed_height_m: 15.0
+  roll_deg: 0.0
+  mvp_distance_to_primary_target_m: 450.0
+  orbit_sequence:
+    enabled: true
+    # Distance variety keeps small (helicopter) and large (cargo ship) targets
+    # readable. Collapsing to all-300 m made cargo ships fill the frame.
+    distances_m: [320.0, 360.0, 410.0, 460.0, 520.0, 580.0, 340.0, 390.0, 480.0, 560.0]
+    # Azimuth 330° replaces the original 311° that gave one helicopter an
+    # awkward sliver bbox; the rest stay evenly spread around the target.
+    azimuths_deg: [0.0, 38.0, 77.0, 116.0, 154.0, 196.0, 234.0, 272.0, 330.0, 346.0]
+  image:
+    width: 2560
+    height: 1440
+  fov:
+    source: "calibrating_dcs_render"
+    vertical_deg: 49.5
+    horizontal_deg: null
+  clip_planes_m:
+    near: null
+    far: null
+  conventions:
+    world_axes: "DCS: X=north, Y=up, Z=east; meters"
+    camera_axes: "CV camera: x=right, y=up, z=forward"
+    projection_order: "world -> camera -> normalized image plane -> pixels"
+
+validation:
+  min_bbox_width_px: 20
+  min_bbox_height_px: 20
+  min_bbox_area_px2: 400
+  min_visible_fraction: 0.20
+  reject_if_truncation_pct_over: 0.80
+  reject_if_occlusion_pct_over: 0.60
+  reject_if_sync_invalid: true
+  reject_if_center_outside_and_vertices_outside: true
+
+bbox_refinement:
+  enabled: true
+  fallback_to_geometry_on_failure: true
+  ignore_bottom_px: 45
+  min_refined_area_px: 16
+  airborne_padding_px: 2
+  ship_padding_px: 3
+
+export:
+  image_format: "png"
+  write_custom_json: true
+  write_coco: true
+  write_yolo: true
+  include_projected_points: true
+  include_world_geometry: true
+
+runtime:
+  capture_timeout_s: 300.0
+  poll_interval_s: 0.2
+  launch_wait_s: 35.0
+  close_dcs_on_exit: true
+  kill_existing_dcs_before_launch: true
+  kill_dcs_on_exit: true
+  dcs_restart_wait_s: 10.0
+  mission_launch_style: "force_start"
+  probe_before_capture: true
+  pause_first_capture: true
+  camera_settle_delay_s: 0.5
+  cleanup_source_screenshots: false
+
+integration:
+  telemetry_transport: "udp_or_file_ack"
+  telemetry_udp_port: 15000
+  command_udp_port: 15001
+  request_file: "C:/Users/maest/Saved Games/DCS/Logs/cv_capture_request.json"
+  snapshot_dir: "C:/Users/maest/Saved Games/DCS/Logs/cv_snapshots"
+  screenshot_ack_file: "C:/Users/maest/Saved Games/DCS/Logs/cv_screenshot_ack.json"
+  pause_ack_file: "C:/Users/maest/Saved Games/DCS/Logs/cv_pause_ack.json"
+  camera_request_file: "C:/Users/maest/Saved Games/DCS/Logs/cv_camera_request.json"
+  camera_ack_file: "C:/Users/maest/Saved Games/DCS/Logs/cv_camera_ack.json"
+  notes:
+    - "100-frame static neutral Caucasus run; core bbox/sync algorithms unchanged."
