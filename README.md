@@ -35,13 +35,17 @@ terminal dashboard. No Airflow, no web UI.
 
 ## Preview
 
+**Dataset engine**
 <img width="640" height="360" alt="frame_20260603_233101_0004_overlay" src="https://github.com/user-attachments/assets/b5b05eec-cd73-42b2-ae85-254c71cd5356" />
 <img width="640" height="360" alt="frame_20260603_233101_0004" src="https://github.com/user-attachments/assets/306f4fdd-9703-4a8f-89aa-a1eabdc41e93" />
 <img width="640" height="360" alt="frame_20260603_231313_0001_overlay" src="https://github.com/user-attachments/assets/747da959-b684-4e5b-b08b-b3d6a4b33de2" />
 <img width="640" height="360" alt="frame_20260603_231313_0001" src="https://github.com/user-attachments/assets/c8350719-7826-4f71-9a5e-ec7fe92bd91a" />
 
+**Metrics MLFlow**
+<img width="640" height="360" alt="image_1" src="https://github.com/user-attachments/assets/fa716e25-a7d3-4b98-b3e6-6e68859c5066" />
+<img width="640" height="360" alt="image_2" src="https://github.com/user-attachments/assets/614491f3-d658-4184-9dd9-dcaadea3ee3a" />
 
-
+**Pipeline(CLI + TUI)**
 <img width="1280" height="720" alt="video_1" src="https://github.com/user-attachments/assets/b286694f-c3a2-4c23-9f58-965cd7b9d549" />
 <img width="1280" height="720" alt="video_2" src="https://github.com/user-attachments/assets/021bdb3b-a1ed-405c-9b3d-3889f7df9420" />
 
