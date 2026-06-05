@@ -35,9 +35,16 @@ terminal dashboard. No Airflow, no web UI.
 
 ## Preview
 
-![Uploading frame_20260603_231313_0001.png…]()
+<img width="2560" height="1440" alt="frame_20260603_231313_0001" src="https://github.com/user-attachments/assets/1dd95a22-029d-4f0f-9123-d3bd16188e8b" />
+<img width="2560" height="1440" alt="frame_20260603_231313_0001_overlay" src="https://github.com/user-attachments/assets/dcda6fa4-2bc0-43c2-9fa3-8e9b5dd8096c" />
 
 
+<img width="2560" height="1440" alt="frame_20260603_233101_0004" src="https://github.com/user-attachments/assets/fc50f272-0922-43b0-bd01-463e6c171ba4" />
+<img width="2560" height="1440" alt="frame_20260603_233101_0004_overlay" src="https://github.com/user-attachments/assets/0c64b5d5-c477-468e-bdbf-45deb94d669e" />
+
+
+<img width="2560" height="1374" alt="video_2" src="https://github.com/user-attachments/assets/021bdb3b-a1ed-405c-9b3d-3889f7df9420" />
+<img width="2560" height="1372" alt="video_1" src="https://github.com/user-attachments/assets/b286694f-c3a2-4c23-9f58-965cd7b9d549" />
 
 
 ---
